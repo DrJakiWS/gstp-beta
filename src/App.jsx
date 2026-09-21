@@ -239,8 +239,14 @@ async function postToSheet(payload) {
     return { ok: false, reason: "not_configured" };
   }
   try {
+    // Apps Script web apps respond via a redirect that browsers won't let
+    // JavaScript read across origins. "no-cors" mode sends the request and
+    // lets it execute server-side (the data still reaches the Sheet), it
+    // just means we can't read anything back — which is fine here, since
+    // we never read the response anyway.
     await fetch(SHEETS_WEBHOOK_URL, {
       method: "POST",
+      mode: "no-cors",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload),
     });
