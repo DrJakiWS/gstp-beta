@@ -35,7 +35,7 @@ import { Printer, RotateCcw, Download, AlertCircle, Mail } from "lucide-react";
 // -------------------------------------------------------------------------
 // >>> EDIT THIS ONCE YOU HAVE IT: your deployed Apps Script Web App URL <<<
 // -------------------------------------------------------------------------
-const SHEETS_WEBHOOK_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwybLgTZyaaMKNIN4wZYxt08A-ctB7kwv7zC55saEZt5dg7KcqvyPIfW4yY-hoWfdcZBg/exec";
 
 // >>> EDIT THIS: your discovery-call booking link (Calendly or similar) <<<
 const COACHING_BOOKING_URL = "PASTE_YOUR_BOOKING_LINK_HERE";
