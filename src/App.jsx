@@ -38,7 +38,7 @@ import { Printer, RotateCcw, Download, AlertCircle, Mail } from "lucide-react";
 const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwybLgTZyaaMKNIN4wZYxt08A-ctB7kwv7zC55saEZt5dg7KcqvyPIfW4yY-hoWfdcZBg/exec";
 
 // >>> EDIT THIS: your discovery-call booking link (Calendly or similar) <<<
-const COACHING_BOOKING_URL = "PASTE_YOUR_BOOKING_LINK_HERE";
+const COACHING_BOOKING_URL = "https://calendly.com/coachjakiws/15min";
 
 // -------------------------------------------------------------------------
 // CONFIG LAYER: item bank (22 items: 18 scored + 4 unscored CC items)
