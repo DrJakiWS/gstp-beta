@@ -364,8 +364,18 @@ function Eyebrow({ children }) {
 // =========================================================================
 // MAIN APPLICATION
 // =========================================================================
+function getSourceTag() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("src") || "direct";
+  } catch (e) {
+    return "direct";
+  }
+}
+
 export default function GSTPBeta() {
   const [screen, setScreen] = useState("intro");
+  const [sourceTag] = useState(getSourceTag);
   const [researchConsent, setResearchConsent] = useState(false);
   const [respondentId] = useState(generateRespondentId);
   const [responses, setResponses] = useState({});
@@ -428,6 +438,7 @@ export default function GSTPBeta() {
       item_bank_version: VERSION_INFO.item_bank_version,
       scoring_model_version: VERSION_INFO.scoring_model_version,
       research_consent: true,
+      source: sourceTag,
       item_level_data: itemLevelData,
       construct_level_data: activeConstructs.map((c) => ({
         construct_id: c.construct_id,
