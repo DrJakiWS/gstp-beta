@@ -700,6 +700,14 @@ function ReportScreen({
       email,
       marketing_consent: marketingConsent,
       submitted_at: new Date().toISOString(),
+      // Included so the backend can actually email a saved copy back,
+      // rather than just recording the address with nothing to send.
+      construct_level_data: constructs.map((c) => ({
+        construct_id: c.construct_id,
+        construct_name: c.construct_name,
+        score: scores[c.construct_id]?.value ?? null,
+        band: bandLabel(c.construct_id, scores[c.construct_id]?.value),
+      })),
     });
     setContactState(result.ok ? "saved" : "failed");
   };
