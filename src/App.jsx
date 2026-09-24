@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Printer, RotateCcw, Download, AlertCircle, Mail } from "lucide-react";
 
 /* =========================================================================
@@ -679,6 +679,58 @@ function ReportScreen({
   const [email, setEmail] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [contactState, setContactState] = useState("idle"); // idle | saving | saved | failed
+
+  // ---- Auto-capture the reflection text (Section: "What are you noticing?"
+  // and "Looking across your results") ----
+  // These prompts already exist as part of the reflection experience, not
+  // as an added research question, but the answers were previously only
+  // included in the manual JSON download and otherwise discarded. This
+  // saves them to a "Reflections" sheet automatically: a few seconds after
+  // the person stops typing, and again as a safety net the moment they
+  // leave the page, so nothing requires an extra click or a new question.
+  const reflectionRef = useRef({ wholeProfileNote, noticingNotes });
+  useEffect(() => {
+    reflectionRef.current = { wholeProfileNote, noticingNotes };
+  }, [wholeProfileNote, noticingNotes]);
+
+  useEffect(() => {
+    const hasContent = wholeProfileNote || noticingNotes.some((n) => n);
+    if (!hasContent) return;
+    const timer = setTimeout(() => {
+      postToSheet({
+        action: "submit_reflection",
+        respondent_id: respondentId,
+        whole_profile_note: wholeProfileNote,
+        noticing_notes: noticingNotes,
+      });
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [wholeProfileNote, noticingNotes, respondentId]);
+
+  useEffect(() => {
+    function flush() {
+      const current = reflectionRef.current;
+      const hasContent = current.wholeProfileNote || current.noticingNotes.some((n) => n);
+      if (!hasContent) return;
+      if (!SHEETS_WEBHOOK_URL || SHEETS_WEBHOOK_URL.startsWith("PASTE_")) return;
+      const payload = JSON.stringify({
+        action: "submit_reflection",
+        respondent_id: respondentId,
+        whole_profile_note: current.wholeProfileNote,
+        noticing_notes: current.noticingNotes,
+      });
+      navigator.sendBeacon(SHEETS_WEBHOOK_URL, new Blob([payload], { type: "text/plain;charset=utf-8" }));
+    }
+    function handleVisibility() {
+      if (document.visibilityState === "hidden") flush();
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("pagehide", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("pagehide", flush);
+    };
+  }, [respondentId]);
 
   const dateStr = completedAt
     ? completedAt.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
