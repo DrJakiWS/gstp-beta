@@ -587,9 +587,12 @@ function IntroScreen({ researchConsent, setResearchConsent, onStart, itemCount }
           className="mt-1 w-4 h-4 rounded border-[#DAD5C4] text-[#3F4A36] focus:ring-[#6B7A5E]"
         />
         <span className="text-sm text-[#5A5646] leading-relaxed">
-          I consent to my anonymised responses being used for ongoing research and development of this
-          tool. I understand this is a research-stage assessment, not a validated clinical instrument,
-          and that I can withdraw at any time.
+          I confirm that I am 18 years of age or older. I consent to my anonymised responses being used
+          for ongoing research and development of this tool. I understand this is a research-stage
+          assessment, not a validated clinical instrument, and that I can withdraw at any time. Read our{" "}
+          <a href="/privacy.html" target="_blank" rel="noreferrer" className="underline text-[#3F4A36]">
+            full privacy statement
+          </a>.
         </span>
       </label>
 
