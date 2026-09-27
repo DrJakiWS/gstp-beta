@@ -1069,6 +1069,18 @@ function ReportScreen({
             Book your free discovery call
           </a>
         </div>
+
+        <p className="mt-6 text-sm text-[#7A7563] text-center">
+          Know someone who might find this useful? Feel free to pass it along:{" "}
+          <a
+            href="https://beta.groundedbelief.com/?src=referral"
+            target="_blank"
+            rel="noreferrer"
+            className="underline text-[#3F4A36]"
+          >
+            beta.groundedbelief.com
+          </a>
+        </p>
       </section>
 
       {/* CLOSING */}
