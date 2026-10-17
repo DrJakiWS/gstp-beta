@@ -1,9 +1,8 @@
-# Grounded Self-Trust Profile™ — Beta (v0.2)
+# Grounded Self-Trust Profile™ — Beta (v0.3)
 
 Extends the v0.1 prototype: 22 items (18 scored across Security & Stability,
 Success Ownership, and Performance Flexibility; 4 unscored behavioural
-items), research-consent gate, provisional score bands, per-dimension
-coaching bridge, optional email capture, and real submission to a Google
+items), research-consent gate, score bands disabled pending recalculation for the corrected item bank, optional email capture, and real submission to a Google
 Sheet. No embedded A/B wording test in this ship (deliberately deferred).
 
 ## 1. Set up the Google Sheets backend
@@ -31,10 +30,12 @@ Sheet. No embedded A/B wording test in this ship (deliberately deferred).
 
 ## 3. Deploy to Netlify via GitHub
 
-1. Push this whole folder to your new GitHub repo (`git init`, `git add .`,
-   `git commit -m "GSTP beta v0.2"`, then follow GitHub's instructions to
-   push to your empty repo).
-2. In Netlify: Link repository → GitHub → select the repo.
+1. Review the v0.3 changes and commit the corrected files to the existing
+   `DrJakiWS/gstp-beta` repository. Keep the existing repository structure and
+   configuration; do not initialise a new repository over it.
+2. The connected Netlify project should build from the repository after the
+   change is pushed. Verify the deploy preview before publishing to the live
+   domain.
 3. Build settings:
    - **Build command:** `npm run build`
    - **Publish directory:** `dist`
@@ -45,14 +46,21 @@ Sheet. No embedded A/B wording test in this ship (deliberately deferred).
 - No overall/combined score across the three dimensions.
 - No clinical language, diagnostic categories, or automated
   recommendations tied to a specific score.
-- No A/B wording test (see project chat for why — the items needing
-  revised wording aren't in this slimmed set; planned as a smaller,
-  separate follow-up).
+- No A/B wording test in this release. Any wording experiment should be planned and versioned separately.
 
 ## Files
 
 - `src/App.jsx` — the whole app (config layers + scoring engine + UI).
 - `apps-script.gs` — paste into Google Sheets' Apps Script editor.
-- `PROVISIONAL_BANDS` and the response-scale labels inside `App.jsx` are
-  both explicitly labelled in comments as provisional — recompute the
-  bands once real beta data accumulates.
+- `PROVISIONAL_BANDS` is intentionally empty in v0.3. Recalculate and document score-band thresholds for the corrected item bank before enabling bands. The response-scale instructions define the meaning of each response from 1 to 5.
+
+
+## v0.3 correction notes
+
+- Corrected item IDs, wording, domain assignments, and reverse-scoring flags to the agreed Research Beta specification.
+- Version strings updated to `GSTP Item Bank v0.3`, `GSTP Scoring Model v0.3`, and `GSTP Report v0.3 (Beta)`.
+- Score bands disabled pending recalculation for the corrected item bank.
+- Added clear 1–5 response-scale instructions before and during the questionnaire.
+- Replaced repetitive follow-up reflection prompts with action-oriented prompts.
+- Removed per-domain coaching prompts; a single optional invitation remains at the end of the report.
+- Existing v0.2 responses must remain labelled v0.2 and must not be reinterpreted as v0.3 data.
