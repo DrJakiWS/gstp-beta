@@ -325,6 +325,7 @@ function LikertRow({ item, index, total, value, onChange, hasError }) {
               type="button"
               role="radio"
               aria-checked={selected}
+              aria-label={`${opt.value}: ${opt.label}`}
               onClick={() => onChange(item.item_id, opt.value)}
               className={`flex flex-col items-center justify-center gap-1 rounded-lg border px-1 py-2.5 text-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6B7A5E] ${
                 selected
@@ -337,6 +338,11 @@ function LikertRow({ item, index, total, value, onChange, hasError }) {
             </button>
           );
         })}
+      </div>
+      {/* Mobile only: per-button labels are hidden on small screens, so show the scale endpoints under every item. */}
+      <div className="sm:hidden mt-1.5 flex justify-between text-[11px] leading-tight text-[#7A7462]" aria-hidden="true">
+        <span>1 = {RESPONSE_SCALE_LABELS[0].label}</span>
+        <span>5 = {RESPONSE_SCALE_LABELS[RESPONSE_SCALE_LABELS.length - 1].label}</span>
       </div>
       {hasError && (
         <p className="mt-2 text-xs text-[#A24B3B] flex items-center gap-1">
@@ -376,7 +382,7 @@ export default function GSTPBeta() {
   const [responses, setResponses] = useState({});
   const [erroredItems, setErroredItems] = useState([]);
   const [wholeProfileNote, setWholeProfileNote] = useState("");
-  const [noticingNotes, setNoticingNotes] = useState(["", "", "", ""]);
+  const [noticingNotes, setNoticingNotes] = useState(["", "", ""]);
   const [completedAt, setCompletedAt] = useState(null);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | failed
 
