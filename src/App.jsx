@@ -26,9 +26,14 @@ import { Printer, RotateCcw, Download, AlertCircle, Mail } from "lucide-react";
      web app) alongside the existing self-download.
    - Removed: the "researcher code" field (a closed-pilot artifact; this
      is an open funnel now).
-   - NOT added (still true to the v0.1 brief's restraint): no overall
-     GSTP score, no clinical language, no automated recommendations tied
-     to a specific score.
+   - Interpretation Engine v1 (see the INTERPRETATION ENGINE block below):
+     answer-scale levels with paired labels, level-specific copy and
+     practices, an SEC facet note, a behavioural reflection for CC1–CC4,
+     optional accuracy ratings, an adaptive closing coaching invitation,
+     an optional quote-permission checkbox, and a saved-only consistency
+     count. Source: "GSTP Interpretation Engine v1: Content Specification".
+   - Still NOT added: no overall GSTP score, no clinical language, no
+     comparison with other people or between dimensions.
    ========================================================================= */
 
 // -------------------------------------------------------------------------
@@ -166,6 +171,203 @@ const VERSION_INFO = {
   scoring_model_version: "GSTP Scoring Model v0.3",
   item_bank_version: "GSTP Item Bank v0.3",
 };
+
+// =========================================================================
+// INTERPRETATION ENGINE v1
+// Content and rules from "GSTP Interpretation Engine v1: Content
+// Specification" (signed off 18 October 2026). Copy lives here as data so it
+// can be edited without touching the report layout. Freeze this block
+// during data collection; adding an approved participant quote is the only
+// permitted change, and it bumps ENGINE_VERSION (v1.1, v1.2...).
+// =========================================================================
+const ENGINE_VERSION = "GSTP Interpretation Engine v1";
+
+// Levels are tied to the 1–5 answer scale, not to norms. Same cut-points
+// for every scale. Scores are already reverse-scored, so higher always
+// means more grounded.
+const LEVELS = [
+  {
+    min: 4.0,
+    key: "well_grounded",
+    label: "Well grounded",
+    descriptor: "A steady strength to build on",
+    meaning: "On average, these grounded patterns are very or extremely true for you.",
+  },
+  {
+    min: 3.0,
+    key: "finding_footing",
+    label: "Finding your footing",
+    descriptor: "A growing edge",
+    meaning: "On average, these patterns are moderately true for you: present, but not reliably.",
+  },
+  {
+    min: -Infinity,
+    key: "building_ground",
+    label: "Building your ground",
+    descriptor: "A starting point",
+    meaning: "On average, these patterns are slightly or not at all true for you at the moment.",
+  },
+];
+
+function levelFor(score) {
+  if (typeof score !== "number") return null;
+  return LEVELS.find((l) => score >= l.min) || null;
+}
+
+const ENGINE_CONTENT = {
+  SEC: {
+    well_grounded: {
+      strengths:
+        "Your sense of worth tends to hold when things go wrong, when others succeed, or after criticism. Setbacks register without becoming a verdict on who you are.",
+      watch:
+        "Long stretches of pressure or a major loss can still shake this; steadiness is not the same as never being affected.",
+      practices: [
+        "Notice what you do that keeps you steady, so you can return to it deliberately.",
+        "Name one person whose success you can celebrate this week without measuring yourself against it.",
+      ],
+    },
+    finding_footing: {
+      strengths:
+        "Your footing often holds, but some situations, such as comparison, criticism or a run of poor results, can loosen it.",
+      watch: "The same triggers tend to recur; they are easier to spot than to stop.",
+      practices: [
+        "After a wobble, write down what set it off and what helped you recover.",
+        "When you notice comparison, ask: “What is my own progress telling me?”",
+      ],
+    },
+    building_ground: {
+      strengths:
+        "Setbacks, criticism or others’ progress can feel like they say something about your worth, and that feeling can linger.",
+      watch: "Second-guessing and comparison can feed each other, making a hard day feel bigger than it is.",
+      practices: [
+        "Separate “what happened” from “what it means about me” when you journal about a setback.",
+        "Keep a short list of evidence of who you are that does not depend on outcomes.",
+      ],
+    },
+  },
+  SO: {
+    well_grounded: {
+      strengths:
+        "You notice when you have achieved something and can name the effort, skills or decisions behind it. Past successes count as evidence of what you can do.",
+      watch: "Under a new challenge, old evidence can feel less relevant; doubt can return in unfamiliar territory.",
+      practices: [
+        "Before a stretch task, list two past wins that used similar skills.",
+        "Tell one person what you did that made a recent success work.",
+      ],
+    },
+    finding_footing: {
+      strengths:
+        "You often recognise your successes, but sometimes credit them to luck, timing or others, or doubt your own part.",
+      watch: "Moving on to the next task before registering what went well.",
+      practices: [
+        "At the end of each week, note one success and one thing you did to make it happen.",
+        "When you catch yourself saying “I was lucky”, add “and I…”.",
+      ],
+    },
+    building_ground: {
+      strengths: "Successes may pass without much notice, or you may doubt that your ability played a real part.",
+      watch: "Brushing past wins can leave you with little evidence to draw on when confidence dips.",
+      practices: [
+        "Keep a running “evidence file” of things that went well and your part in each.",
+        "Ask someone you trust what they saw you contribute to a recent success.",
+      ],
+    },
+  },
+  PF: {
+    well_grounded: {
+      strengths:
+        "You can treat mistakes as information, adjust your approach, and finish work to a good standard without needing it to be perfect.",
+      watch: "High-stakes work can still pull you towards over-preparing or over-refining.",
+      practices: [
+        "Before polishing further, ask: “Would another hour change the outcome?”",
+        "Share what you learned from a recent mistake with a colleague.",
+      ],
+    },
+    finding_footing: {
+      strengths:
+        "You can usually learn from mistakes, but sometimes delay starting until you feel ready, or keep refining past the point of real benefit.",
+      watch: "Preparation and polishing can feel productive while quietly holding work back.",
+      practices: [
+        "Set a “good enough” standard before you start a task.",
+        "Start one thing this week before you feel fully prepared.",
+      ],
+    },
+    building_ground: {
+      strengths:
+        "Mistakes may feel like judgements about your ability, and imperfect work can be hard to release, so you may wait, prepare or refine for longer than the task needs.",
+      watch: "Avoiding imperfection can reduce the very feedback that would help you improve.",
+      practices: [
+        "After a mistake, write one sentence on what happened and one on what you will try next.",
+        "Release one piece of work at a stage you would normally keep polishing.",
+      ],
+    },
+  },
+};
+
+// SEC facet layer: Comparison (CO) and Identity Stability (IS). Self-Trust
+// (STS2, STS3) counts in the SEC score only; two items are too few to report.
+const SEC_FACETS = {
+  CO: ["CO1", "CO2", "CO4", "CO5"],
+  IS: ["IS1", "IS4", "IS5", "IS6"],
+};
+const SEC_FACET_THRESHOLD = 0.75; // provisional; review at ~200 v0.3 completions
+const SEC_FACET_COPY = {
+  CO_higher:
+    "Other people’s progress seems to affect you less than setbacks and criticism do. Your steadiness may be most tested when things go wrong for you directly.",
+  IS_higher:
+    "Your sense of who you are seems fairly steady, but comparison with others may pull on it more. Noticing when you start measuring yourself against someone else could be a useful place to begin.",
+};
+
+function secFacetNote(itemLevelData) {
+  const mean = (ids) => {
+    const vals = itemLevelData.filter((r) => ids.includes(r.item_id) && r.scored_response !== null).map((r) => r.scored_response);
+    return vals.length === ids.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  };
+  const co = mean(SEC_FACETS.CO);
+  const is = mean(SEC_FACETS.IS);
+  if (co === null || is === null) return "none";
+  if (co - is >= SEC_FACET_THRESHOLD) return "CO_higher";
+  if (is - co >= SEC_FACET_THRESHOLD) return "IS_higher";
+  return "none";
+}
+
+// Consistency check: calculated and saved only; changes nothing shown in v1.
+// A pair counts when both opposing statements are rated 4 or 5 (raw).
+const CONSISTENCY_PAIRS = [
+  ["CO1", "CO4"],
+  ["IS4", "IS5"],
+  ["SO6", "SO4"],
+  ["PF5", "PF2"],
+];
+
+function consistencyContradictions(responses) {
+  return CONSISTENCY_PAIRS.filter(([a, b]) => responses[a] >= 4 && responses[b] >= 4).length;
+}
+
+function plainName(name) {
+  return name.replace(/™/g, "");
+}
+
+// Closing coaching invitation: opening line adapts to the levels.
+function coachingOpening(constructs, scores) {
+  const withLevel = constructs.map((c) => ({ c, level: levelFor(scores[c.construct_id]?.value) }));
+  const building = withLevel.find((x) => x.level?.key === "building_ground");
+  if (building) {
+    return `If ${plainName(building.c.construct_name)} is an area you’d like to work on with support, this is the kind of change people make through executive coaching.`;
+  }
+  const footing = withLevel.find((x) => x.level?.key === "finding_footing");
+  if (footing) {
+    return `If you’d like to make ${plainName(footing.c.construct_name)} more reliable, especially under pressure, coaching offers a practical space to do that.`;
+  }
+  return "Your results describe a fairly steady foundation. Coaching can help you use it deliberately as your responsibilities and challenges grow.";
+}
+
+// Approved participant quotes (anonymous, attributed as "Beta participant").
+// v1 ships empty. Add a quote only with written permission, and bump
+// ENGINE_VERSION when you do.
+const PARTICIPANT_QUOTES = [];
+
+const ACCURACY_LABELS = { min: "Not at all accurate", max: "Very accurate" };
 
 // -------------------------------------------------------------------------
 // SCORING ENGINE: pure functions, unchanged from v0.1, portable to a
@@ -362,6 +564,45 @@ function Eyebrow({ children }) {
   );
 }
 
+const CC_ITEMS = ITEM_BANK.filter((i) => i.construct_id === "CC" && i.active);
+
+function AccuracyRating({ constructId, constructName, value, onChange }) {
+  return (
+    <div className="no-print mt-8 rounded-lg border border-[#DAD5C4] bg-white px-4 py-4">
+      <p id={`acc-${constructId}`} className="text-sm font-medium text-[#23261F]">
+        How accurately does this describe you? <span className="font-normal text-[#9C9580]">(optional)</span>
+      </p>
+      <div role="radiogroup" aria-labelledby={`acc-${constructId}`} className="mt-3 grid grid-cols-5 gap-1.5 sm:gap-2">
+        {[1, 2, 3, 4, 5].map((v) => {
+          const selected = value === v;
+          const label = v === 1 ? ACCURACY_LABELS.min : v === 5 ? ACCURACY_LABELS.max : String(v);
+          return (
+            <button
+              key={v}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={`${constructName} accuracy ${label}`}
+              onClick={() => onChange(v)}
+              className={`rounded-lg border py-2 font-mono text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6B7A5E] ${
+                selected
+                  ? "bg-[#3F4A36] border-[#3F4A36] text-[#F4F2E9]"
+                  : "bg-white border-[#DAD5C4] text-[#5A5646] hover:border-[#9C9580]"
+              }`}
+            >
+              {v}
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-1.5 flex justify-between text-[11px] leading-tight text-[#7A7462]" aria-hidden="true">
+        <span>1 = {ACCURACY_LABELS.min}</span>
+        <span>5 = {ACCURACY_LABELS.max}</span>
+      </div>
+    </div>
+  );
+}
+
 // =========================================================================
 // MAIN APPLICATION
 // =========================================================================
@@ -383,6 +624,9 @@ export default function GSTPBeta() {
   const [erroredItems, setErroredItems] = useState([]);
   const [wholeProfileNote, setWholeProfileNote] = useState("");
   const [noticingNotes, setNoticingNotes] = useState(["", "", ""]);
+  const [accuracy, setAccuracy] = useState({}); // { SEC: 1–5, SO: 1–5, PF: 1–5 }
+  const [ccReflection, setCcReflection] = useState("");
+  const [quotePermission, setQuotePermission] = useState(false);
   const [completedAt, setCompletedAt] = useState(null);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | failed
 
@@ -410,6 +654,8 @@ export default function GSTPBeta() {
     () => computeConstructScores(itemLevelData, activeConstructs, SCORING_CONFIG),
     [itemLevelData, activeConstructs]
   );
+
+  const secFacet = useMemo(() => secFacetNote(itemLevelData), [itemLevelData]);
 
   const handleResponse = useCallback((itemId, value) => {
     setResponses((prev) => ({ ...prev, [itemId]: value }));
@@ -440,14 +686,23 @@ export default function GSTPBeta() {
       scoring_model_version: VERSION_INFO.scoring_model_version,
       research_consent: true,
       source: sourceTag,
+      engine_version: ENGINE_VERSION,
+      sec_facet_note: secFacet,
+      consistency_contradictions: consistencyContradictions(responses),
       item_level_data: itemLevelData,
-      construct_level_data: activeConstructs.map((c) => ({
-        construct_id: c.construct_id,
-        construct_name: c.construct_name,
-        score: constructScores[c.construct_id]?.value ?? null,
-        n_items: constructScores[c.construct_id]?.n ?? 0,
-        band: bandLabel(c.construct_id, constructScores[c.construct_id]?.value),
-      })),
+      construct_level_data: activeConstructs.map((c) => {
+        const value = constructScores[c.construct_id]?.value ?? null;
+        const level = levelFor(value);
+        return {
+          construct_id: c.construct_id,
+          construct_name: c.construct_name,
+          score: value,
+          n_items: constructScores[c.construct_id]?.n ?? 0,
+          band: bandLabel(c.construct_id, value),
+          level: level?.label ?? null,
+          descriptor: level?.descriptor ?? null,
+        };
+      }),
     });
     setSaveState(result.ok ? "saved" : "failed");
   };
@@ -456,7 +711,10 @@ export default function GSTPBeta() {
     setResponses({});
     setErroredItems([]);
     setWholeProfileNote("");
-    setNoticingNotes(["", "", "", ""]);
+    setNoticingNotes(["", "", ""]);
+    setAccuracy({});
+    setCcReflection("");
+    setQuotePermission(false);
     setCompletedAt(null);
     setResearchConsent(false);
     setSaveState("idle");
@@ -471,6 +729,7 @@ export default function GSTPBeta() {
         completed_at: completedAt ? completedAt.toISOString() : null,
         item_bank_version: VERSION_INFO.item_bank_version,
         scoring_model_version: VERSION_INFO.scoring_model_version,
+        engine_version: ENGINE_VERSION,
       },
       item_level_data: itemLevelData,
       construct_level_data: activeConstructs.map((c) => ({
@@ -478,10 +737,13 @@ export default function GSTPBeta() {
         construct_name: c.construct_name,
         score: constructScores[c.construct_id]?.value ?? null,
         n_items: constructScores[c.construct_id]?.n ?? 0,
+        level: levelFor(constructScores[c.construct_id]?.value)?.label ?? null,
+        accuracy_rating: accuracy[c.construct_id] ?? null,
       })),
       report_record: { report_version: VERSION_INFO.report_version, generated_at: new Date().toISOString() },
       whole_profile_reflection: wholeProfileNote,
       noticing_reflection: noticingNotes,
+      cc_reflection: ccReflection,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -544,6 +806,14 @@ export default function GSTPBeta() {
           setWholeProfileNote={setWholeProfileNote}
           noticingNotes={noticingNotes}
           setNoticingNotes={setNoticingNotes}
+          responses={responses}
+          secFacet={secFacet}
+          accuracy={accuracy}
+          setAccuracy={setAccuracy}
+          ccReflection={ccReflection}
+          setCcReflection={setCcReflection}
+          quotePermission={quotePermission}
+          setQuotePermission={setQuotePermission}
           onRestart={handleRestart}
           onExport={handleExport}
           saveState={saveState}
@@ -702,6 +972,14 @@ function ReportScreen({
   setWholeProfileNote,
   noticingNotes,
   setNoticingNotes,
+  responses,
+  secFacet,
+  accuracy,
+  setAccuracy,
+  ccReflection,
+  setCcReflection,
+  quotePermission,
+  setQuotePermission,
   onRestart,
   onExport,
   saveState,
@@ -718,37 +996,45 @@ function ReportScreen({
   // saves them to a "Reflections" sheet automatically: a few seconds after
   // the person stops typing, and again as a safety net the moment they
   // leave the page, so nothing requires an extra click or a new question.
-  const reflectionRef = useRef({ wholeProfileNote, noticingNotes });
+  const reflectionRef = useRef({ wholeProfileNote, noticingNotes, accuracy, ccReflection, quotePermission });
   useEffect(() => {
-    reflectionRef.current = { wholeProfileNote, noticingNotes };
-  }, [wholeProfileNote, noticingNotes]);
+    reflectionRef.current = { wholeProfileNote, noticingNotes, accuracy, ccReflection, quotePermission };
+  }, [wholeProfileNote, noticingNotes, accuracy, ccReflection, quotePermission]);
+
+  function reflectionHasContent(r) {
+    return Boolean(
+      r.wholeProfileNote || r.noticingNotes.some((n) => n) || r.ccReflection || r.quotePermission || Object.keys(r.accuracy).length
+    );
+  }
+  function reflectionPayload(r) {
+    return {
+      action: "submit_reflection",
+      respondent_id: respondentId,
+      engine_version: ENGINE_VERSION,
+      whole_profile_note: r.wholeProfileNote,
+      noticing_notes: r.noticingNotes,
+      accuracy: r.accuracy,
+      cc_reflection: r.ccReflection,
+      quote_permission: r.quotePermission,
+    };
+  }
 
   useEffect(() => {
-    const hasContent = wholeProfileNote || noticingNotes.some((n) => n);
-    if (!hasContent) return;
+    const current = { wholeProfileNote, noticingNotes, accuracy, ccReflection, quotePermission };
+    if (!reflectionHasContent(current)) return;
     const timer = setTimeout(() => {
-      postToSheet({
-        action: "submit_reflection",
-        respondent_id: respondentId,
-        whole_profile_note: wholeProfileNote,
-        noticing_notes: noticingNotes,
-      });
+      postToSheet(reflectionPayload(current));
     }, 3000);
     return () => clearTimeout(timer);
-  }, [wholeProfileNote, noticingNotes, respondentId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wholeProfileNote, noticingNotes, accuracy, ccReflection, quotePermission, respondentId]);
 
   useEffect(() => {
     function flush() {
       const current = reflectionRef.current;
-      const hasContent = current.wholeProfileNote || current.noticingNotes.some((n) => n);
-      if (!hasContent) return;
+      if (!reflectionHasContent(current)) return;
       if (!SHEETS_WEBHOOK_URL || SHEETS_WEBHOOK_URL.startsWith("PASTE_")) return;
-      const payload = JSON.stringify({
-        action: "submit_reflection",
-        respondent_id: respondentId,
-        whole_profile_note: current.wholeProfileNote,
-        noticing_notes: current.noticingNotes,
-      });
+      const payload = JSON.stringify(reflectionPayload(current));
       navigator.sendBeacon(SHEETS_WEBHOOK_URL, new Blob([payload], { type: "text/plain;charset=utf-8" }));
     }
     function handleVisibility() {
@@ -760,6 +1046,7 @@ function ReportScreen({
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("pagehide", flush);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [respondentId]);
 
   const dateStr = completedAt
@@ -788,6 +1075,8 @@ function ReportScreen({
         construct_name: c.construct_name,
         score: scores[c.construct_id]?.value ?? null,
         band: bandLabel(c.construct_id, scores[c.construct_id]?.value),
+        level: levelFor(scores[c.construct_id]?.value)?.label ?? null,
+        descriptor: levelFor(scores[c.construct_id]?.value)?.descriptor ?? null,
       })),
     });
     setContactState(result.ok ? "saved" : "failed");
@@ -896,18 +1185,24 @@ function ReportScreen({
         <div className="max-w-xl mx-auto">
           <Eyebrow>Your results at a glance</Eyebrow>
           <p className="mt-3 text-sm text-[#7A7563]">
-            Each marker shows where your responses placed you on a {scaleMin}–{scaleMax} scale.
-            Position on the line does not indicate better or worse; it only shows where your responses currently sit.
+            Each marker shows where your responses placed you on a {scaleMin}–{scaleMax} scale. A higher score means
+            the grounded patterns in that area are more often true for you. Scores describe your own answers, not a
+            comparison with other people.
           </p>
           <div className="mt-8 space-y-7">
             {constructs.map((c) => (
               <div key={c.construct_id}>
-                <div className="flex items-baseline justify-between mb-1.5">
+                <div className="flex items-baseline justify-between gap-3 mb-1.5">
                   <span className="font-medium text-[#23261F]">{c.construct_name}</span>
-                  <span className="font-mono-brand text-sm text-[#5A5646]">
+                  <span className="font-mono-brand text-sm text-[#5A5646] shrink-0">
                     {scores[c.construct_id]?.value != null ? scores[c.construct_id].value.toFixed(1) : "N/A"}
                   </span>
                 </div>
+                {levelFor(scores[c.construct_id]?.value) && (
+                  <p className="text-sm mb-1" style={{ color: c.accent }}>
+                    {levelFor(scores[c.construct_id]?.value).label}
+                  </p>
+                )}
                 <GroundLine
                   score={scores[c.construct_id]?.value}
                   scaleMin={scaleMin}
@@ -924,7 +1219,9 @@ function ReportScreen({
       {/* INDIVIDUAL CONSTRUCT SECTIONS */}
       {constructs.map((c) => {
         const score = scores[c.construct_id]?.value;
-        const band = bandLabel(c.construct_id, score);
+        const level = levelFor(score);
+        const content = level ? ENGINE_CONTENT[c.construct_id]?.[level.key] : null;
+        const facetCopy = c.construct_id === "SEC" ? SEC_FACET_COPY[secFacet] : null;
         return (
           <section key={c.construct_id} className="page-break px-6 py-16 max-w-xl mx-auto border-t border-[#DAD5C4]">
             <div className="w-2.5 h-2.5 rounded-full mb-4" style={{ backgroundColor: c.accent }} />
@@ -937,35 +1234,104 @@ function ReportScreen({
             <p className="mt-2 text-[#3A3A2E] leading-relaxed">{c.definition}</p>
 
             <p className="mt-8 text-xs uppercase tracking-wide text-[#9C9580] font-medium">Your result</p>
-            <div className="mt-3 flex items-center gap-4 flex-wrap">
+            <div className="mt-3 flex items-baseline gap-3 flex-wrap">
               <span className="font-mono-brand text-3xl text-[#23261F]">
                 {score != null ? score.toFixed(1) : "N/A"}
               </span>
               <span className="text-sm text-[#7A7563]">out of {scaleMax}</span>
-              {band && (
-                <span
-                  className="text-xs font-medium px-2.5 py-1 rounded-full"
-                  style={{ backgroundColor: `${c.accent}22`, color: c.accent }}
-                >
-                  {band} so far
-                </span>
-              )}
             </div>
+            {level && (
+              <div className="mt-3">
+                <p className="font-display text-xl sm:text-2xl" style={{ color: c.accent }}>
+                  {level.label}
+                </p>
+                <p className="text-[#5A5646] italic">{level.descriptor}</p>
+              </div>
+            )}
             <div className="mt-3 max-w-xs">
               <GroundLine score={score} scaleMin={scaleMin} scaleMax={scaleMax} accent={c.accent} constructName={c.construct_name} />
             </div>
+            {level && <p className="mt-2 text-[#3A3A2E] leading-relaxed">{level.meaning}</p>}
             <p className="mt-2 text-xs text-[#9C9580] leading-relaxed max-w-sm">
               This is a research-stage reflection score on a 1–5 scale, not a population norm or clinical range.
             </p>
+
+            {content && (
+              <>
+                <p className="mt-8 text-xs uppercase tracking-wide text-[#9C9580] font-medium">What this can look like</p>
+                <p className="mt-2 text-[#3A3A2E] leading-relaxed">{content.strengths}</p>
+
+                <p className="mt-6 text-xs uppercase tracking-wide text-[#9C9580] font-medium">What to watch for</p>
+                <p className="mt-2 text-[#3A3A2E] leading-relaxed">{content.watch}</p>
+
+                {facetCopy && (
+                  <div className="mt-6 rounded-lg px-4 py-3" style={{ backgroundColor: `${c.accent}14` }}>
+                    <p className="text-xs uppercase tracking-wide text-[#7A7563] font-medium mb-1">A closer look</p>
+                    <p className="text-[#3A3A2E] leading-relaxed">{facetCopy}</p>
+                  </div>
+                )}
+
+                <p className="mt-6 text-xs uppercase tracking-wide text-[#9C9580] font-medium">Practices to try</p>
+                <ul className="mt-2 space-y-2 text-[#3A3A2E] leading-relaxed">
+                  {content.practices.map((p, i) => (
+                    <li key={i} className="flex gap-2.5">
+                      <span style={{ color: c.accent }}>•</span>
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
 
             <div className="mt-8 pl-4 border-l-2" style={{ borderColor: c.accent }}>
               <p className="text-xs uppercase tracking-wide text-[#9C9580] font-medium mb-1.5">Consider</p>
               <p className="text-[#3A3A2E] leading-relaxed">{c.reflection_question}</p>
             </div>
 
+            {level && (
+              <AccuracyRating
+                constructId={c.construct_id}
+                constructName={c.construct_name}
+                value={accuracy[c.construct_id]}
+                onChange={(v) => setAccuracy((prev) => ({ ...prev, [c.construct_id]: v }))}
+              />
+            )}
           </section>
         );
       })}
+
+      {/* BEHAVIOURAL REFLECTION (CC1–CC4): never scored, levelled or averaged */}
+      <section className="page-break px-6 py-16 max-w-xl mx-auto border-t border-[#DAD5C4]">
+        <Eyebrow>How this shows up in action</Eyebrow>
+        <p className="mt-4 text-[#3A3A2E] leading-relaxed">
+          These four statements are about what you do, rather than how you see yourself. They are not scored. Here
+          is what you said about each one.
+        </p>
+        <div className="mt-6 space-y-4">
+          {CC_ITEMS.map((item) => {
+            const raw = responses[item.item_id];
+            const label = RESPONSE_SCALE_LABELS.find((o) => o.value === raw)?.label;
+            return (
+              <div key={item.item_id} className="rounded-lg border border-[#DAD5C4] bg-white px-4 py-3">
+                <p className="text-[#23261F] leading-relaxed">{item.item_text}</p>
+                {label && <p className="mt-1 text-sm text-[#7A7563] italic">You said this is {label.toLowerCase()} for you.</p>}
+              </div>
+            );
+          })}
+        </div>
+        <label className="block mt-6">
+          <span className="text-[#23261F] font-medium leading-relaxed">
+            Looking at these, where would you most like to step forward more often?
+          </span>
+          <textarea
+            value={ccReflection}
+            onChange={(e) => setCcReflection(e.target.value)}
+            rows={3}
+            className="mt-2 w-full rounded-lg border border-[#DAD5C4] bg-white px-4 py-3 text-[#2B2B24] leading-relaxed focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6B7A5E]"
+            placeholder="Optional, not scored"
+          />
+        </label>
+      </section>
 
       {/* WHOLE-RESULTS SECTION */}
       <section className="page-break px-6 py-16 max-w-xl mx-auto bg-[#E7E4D4]">
@@ -1028,6 +1394,23 @@ function ReportScreen({
             </label>
           ))}
         </div>
+        <label className="no-print flex items-start gap-2.5 mt-8 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={quotePermission}
+            onChange={(e) => setQuotePermission(e.target.checked)}
+            className="mt-0.5 w-4 h-4 rounded border-[#DAD5C4] text-[#3F4A36] focus:ring-[#6B7A5E]"
+          />
+          <span className="text-xs text-[#7A7563] leading-relaxed">
+            You may quote my reflection anonymously in Grounded Belief materials. Optional. Quotes are attributed
+            only as “Beta participant”, never with my name or email, and I can withdraw permission at any time (see
+            the{" "}
+            <a href="/privacy.html" target="_blank" rel="noreferrer" className="underline">
+              privacy statement
+            </a>
+            ).
+          </span>
+        </label>
       </section>
 
       {/* SAVE RESULTS + COACHING CTA (no-print: this is a live-page action, not part of the PDF) */}
@@ -1070,10 +1453,22 @@ function ReportScreen({
         </div>
 
         <div className="mt-6 rounded-lg bg-[#3F4A36] text-[#F4F2E9] px-5 py-6">
-          <p className="leading-relaxed">
-            Want to explore any of this further? Book a free 20-minute conversation. No pressure, no
-            pitch, just a chance to talk through what might help.
+          <p className="font-display text-lg leading-snug">{coachingOpening(constructs, scores)}</p>
+          <p className="mt-3 leading-relaxed text-[#D9D4C0]">
+            Coaching works with the same three areas as this profile: how steady your sense of self stays, how you
+            own your successes, and how you respond to mistakes and imperfection. A free 20-minute conversation is a
+            chance to talk through what might help. No pressure, no pitch.
           </p>
+          {PARTICIPANT_QUOTES.length > 0 && (
+            <div className="mt-5 space-y-3">
+              {PARTICIPANT_QUOTES.map((q, i) => (
+                <blockquote key={i} className="border-l-2 border-[#C9B98A] pl-3">
+                  <p className="italic text-[#EDEAD9]">“{q}”</p>
+                  <p className="mt-1 text-xs text-[#B8B2A0]">Beta participant</p>
+                </blockquote>
+              ))}
+            </div>
+          )}
           <a
             href={COACHING_BOOKING_URL}
             target="_blank"
@@ -1122,7 +1517,7 @@ function ReportScreen({
               <p className="text-sm text-[#B8B2A0] italic">Part of the Grounded Ecosystem</p>
             </div>
             <p className="font-mono-brand text-[10px] text-[#8A907E]">
-              {VERSION_INFO.report_version} · {VERSION_INFO.scoring_model_version} · {VERSION_INFO.item_bank_version}
+              {VERSION_INFO.report_version} · {VERSION_INFO.scoring_model_version} · {VERSION_INFO.item_bank_version} · {ENGINE_VERSION}
             </p>
           </div>
         </div>
