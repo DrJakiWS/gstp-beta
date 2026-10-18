@@ -64,3 +64,17 @@ Sheet. No embedded A/B wording test in this ship (deliberately deferred).
 - Replaced repetitive follow-up reflection prompts with action-oriented prompts.
 - Removed per-domain coaching prompts; a single optional invitation remains at the end of the report.
 - Existing v0.2 responses must remain labelled v0.2 and must not be reinterpreted as v0.3 data.
+
+## Interpretation Engine v1
+
+Built from "GSTP Interpretation Engine v1: Content Specification" (signed off 18 October 2026). All engine copy and rules live in the `INTERPRETATION ENGINE v1` block near the top of `src/App.jsx`.
+
+- Levels use the 1–5 answer scale, not norms: 4.0+ "Well grounded / A steady strength to build on", 3.0–3.9 "Finding your footing / A growing edge", below 3.0 "Building your ground / A starting point".
+- Each scale section shows what the level can look like, what to watch for, practices to try, the reflection question and an optional accuracy rating.
+- SEC adds a facet note when Comparison and Identity Stability differ by 0.75 or more.
+- CC1–CC4 appear as an unscored behavioural reflection with the respondent's own answers echoed back.
+- The consistency count (0–4) is saved with each response but changes nothing on screen in v1.
+- The closing coaching invitation adapts to the levels. `PARTICIPANT_QUOTES` ships empty; add a quote only with written permission and bump `ENGINE_VERSION` (v1.1, v1.2…).
+- New data fields need the Engine v1 Apps Script (`apps-script.gs`), already deployed.
+
+Freeze the engine block during data collection, until about 200 v0.3 completions are in.
