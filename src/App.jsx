@@ -180,7 +180,7 @@ const VERSION_INFO = {
 // during data collection; adding an approved participant quote is the only
 // permitted change, and it bumps ENGINE_VERSION (v1.1, v1.2...).
 // =========================================================================
-const ENGINE_VERSION = "GSTP Interpretation Engine v1";
+const ENGINE_VERSION = "GSTP Interpretation Engine v1.1";
 
 // Levels are tied to the 1–5 answer scale, not to norms. Same cut-points
 // for every scale. Scores are already reverse-scored, so higher always
@@ -363,9 +363,16 @@ function coachingOpening(constructs, scores) {
 }
 
 // Approved participant quotes (anonymous, attributed as "Beta participant").
-// v1 ships empty. Add a quote only with written permission, and bump
+// v1 shipped empty. Add a quote only with written permission, and bump
 // ENGINE_VERSION when you do.
-const PARTICIPANT_QUOTES = [];
+// v1.1: two quotes added with written permission (sources recorded privately,
+// not in this public repo).
+// The second is its first two sentences, with "releatively" corrected to
+// "relatively", as agreed with the participant.
+const PARTICIPANT_QUOTES = [
+  "Wow! This was such a reflective exercise for me.",
+  "The results are a relatively accurate expression of where I am at the moment. It would be interesting to repeat the test a year from now and compare results.",
+];
 
 const ACCURACY_LABELS = { min: "Not at all accurate", max: "Very accurate" };
 
