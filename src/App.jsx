@@ -55,7 +55,7 @@ const ITEM_BANK = [
   { item_id: "CC1", item_text: "I volunteer for opportunities that interest me even when I am unsure how well I will perform.", construct_id: "CC", reverse_scored: false, active: true, version: "0.3" },
   { item_id: "IS1", item_text: "I have a stable sense of who I am, even when things do not go as planned.", construct_id: "SEC", reverse_scored: false, active: true, version: "0.3" },
   { item_id: "CO4", item_text: "Another person's success can make my own progress feel less significant.", construct_id: "SEC", reverse_scored: true, active: true, version: "0.3" },
-  { item_id: "PF7", item_text: "When I make a mistake, I can focus on what I can learn from it.", construct_id: "PF", reverse_scored: false, active: true, version: "0.3" },
+  { item_id: "PF04", item_text: "I can learn from mistakes without questioning my abilities or skills.", construct_id: "PF", reverse_scored: false, active: true, version: "0.3.1" },
   { item_id: "SO3", item_text: "I can identify the skills, effort, or decisions that contributed to my success.", construct_id: "SO", reverse_scored: false, active: true, version: "0.3" },
   { item_id: "CO1", item_text: "I can celebrate another person's success while remaining connected to my own progress.", construct_id: "SEC", reverse_scored: false, active: true, version: "0.3" },
   { item_id: "CC2", item_text: "I share ideas that may add value even when I am not completely certain they are correct.", construct_id: "CC", reverse_scored: false, active: true, version: "0.3" },
@@ -63,12 +63,12 @@ const ITEM_BANK = [
   { item_id: "PF5", item_text: "I can produce high-quality work without needing it to be perfect.", construct_id: "PF", reverse_scored: false, active: true, version: "0.3" },
   { item_id: "CO2", item_text: "I feel that I am falling behind when I see other people progressing.", construct_id: "SEC", reverse_scored: true, active: true, version: "0.3" },
   { item_id: "SO4", item_text: "Even when I succeed, I sometimes doubt that my own ability contributed to that success.", construct_id: "SO", reverse_scored: true, active: true, version: "0.3" },
-  { item_id: "CC3", item_text: "I avoid opportunities that would place my abilities under closer scrutiny.", construct_id: "CC", reverse_scored: false, active: true, version: "0.3" },
+  { item_id: "CC3", item_text: "I avoid opportunities that would place my abilities under closer scrutiny.", construct_id: "CC", reverse_scored: true, active: true, version: "0.3.1" },
   { item_id: "STS3", item_text: "I second-guess my decisions long after I have made them.", construct_id: "SEC", reverse_scored: true, active: true, version: "0.3" },
   { item_id: "PF4", item_text: "I wait longer than necessary before taking action because I want to be more prepared.", construct_id: "PF", reverse_scored: true, active: true, version: "0.3" },
   { item_id: "IS4", item_text: "I am able to separate my value as a person from my successes and failures.", construct_id: "SEC", reverse_scored: false, active: true, version: "0.3" },
   { item_id: "CO5", item_text: "I measure my progress primarily by how I compare with other people.", construct_id: "SEC", reverse_scored: true, active: true, version: "0.3" },
-  { item_id: "CC4", item_text: "Concern about how others may judge me prevents me from contributing as fully as I could.", construct_id: "CC", reverse_scored: false, active: true, version: "0.3" },
+  { item_id: "CC4", item_text: "Concern about how others may judge me prevents me from contributing as fully as I could.", construct_id: "CC", reverse_scored: true, active: true, version: "0.3.1" },
   { item_id: "SO6", item_text: "When I succeed, I give myself credit for the part my own effort or decisions played in it.", construct_id: "SO", reverse_scored: false, active: true, version: "0.3" },
   { item_id: "STS2", item_text: "After receiving negative feedback, I struggle to trust my judgement again.", construct_id: "SEC", reverse_scored: true, active: true, version: "0.3" },
   { item_id: "PF2", item_text: "I spend additional time preparing or refining work even when further effort is unlikely to make a meaningful difference.", construct_id: "PF", reverse_scored: true, active: true, version: "0.3" },
@@ -168,8 +168,8 @@ function bandLabel(constructId, score) {
 
 const VERSION_INFO = {
   report_version: "GSTP Report v0.3 (Beta)",
-  scoring_model_version: "GSTP Scoring Model v0.3",
-  item_bank_version: "GSTP Item Bank v0.3",
+  scoring_model_version: "GSTP Scoring Model v0.3.1",
+  item_bank_version: "GSTP Item Bank v0.3.1",
 };
 
 // =========================================================================
